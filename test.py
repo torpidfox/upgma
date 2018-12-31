@@ -1,7 +1,7 @@
 import unittest
 from upgma import UPGMA_treeConstructor
-from Bio.Phylo import TreeConstruction
-from Bio.Phylo import Newick
+from Bio import Phylo
+import networkx as nx
 
 class TestUPGMA_treeConstructor(unittest.TestCase):
 
@@ -30,11 +30,10 @@ class TestUPGMA_treeConstructor(unittest.TestCase):
 
 	def test_correct(self):
 		tree1 = UPGMA_treeConstructor('test.txt')
-		tree2 = TreeConstruction.DistanceTreeConstructor().upgma(tree1.distances)
-		print(tree2)
-		print(Newick.Tree(tree1.create_tree()))
+		tree2 = Phylo.TreeConstruction.DistanceTreeConstructor().upgma(tree1.distances)
 
-		self.assertEqual(tree1.create_tree(), tree2)
+		self.assertTrue(nx.is_isomorphic(Phylo.to_networkx(tree1.create_tree()), 
+			Phylo.to_networkx(tree2)))
 
 
 if __name__ == '__main__':

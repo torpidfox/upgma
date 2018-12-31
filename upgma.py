@@ -1,7 +1,5 @@
 from Bio.Phylo import TreeConstruction
-from Bio import Phylo
 import matplotlib.pyplot as plt
-import networkx as nx
 
 def _read_matrix(filename):
 	with open(filename) as f:
@@ -108,21 +106,4 @@ class UPGMA_treeConstructor:
 			plt.savefig(filename)
 
 
-	def compare_trees(self, other):
-		if not hasattr(self, 'tree'):
-			self.create_tree()
-
-
-
-tree = UPGMA_treeConstructor('test.txt')
-#tree.draw()
-constructor = TreeConstruction.DistanceTreeConstructor()
-tree2 = constructor.upgma(tree.distances)
-b = Phylo.to_networkx(tree2)
-tree.create_tree()
-a = Phylo.to_networkx(tree.tree)
-
-
-
-print(nx.is_isomorphic(a,b))
 
