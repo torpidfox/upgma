@@ -56,9 +56,22 @@ def _calc_height(clade, dist):
 
 class UPGMA_treeConstructor:
 	def __init__(self, filename):
+		"""
+		Creates class instance
+
+		Arguments:
+		filename -- the path to file containing
+		distance matrix
+		"""
+
 		self.distances = _read_matrix(filename)
 
 	def create_tree(self):
+
+		"""Methods that constructs upgma tree
+		based on the distance matrix
+		"""
+
 		if not self.distances:
 			self.tree = None
 			return None
@@ -96,6 +109,14 @@ class UPGMA_treeConstructor:
 
 	def draw(self,
 		filename=None):
+
+		"""Method that draws the tree to the
+		file with given name or shows it in 
+		a pop-up window
+
+		Keyword arguments:
+		filename -- the name of file to save the result to
+		"""
 
 		if not hasattr(self, 'tree'):
 			self.create_tree()
