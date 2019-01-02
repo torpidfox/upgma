@@ -18,18 +18,13 @@ class TestUPGMA_treeConstructor(unittest.TestCase):
 
 		self.assertEqual(len(tree.clade), 0)
 
-
 	def test_empty(self):
 		tree = UPGMA_treeConstructor('tests/test_empty.txt').create_tree()
 
 		self.assertEqual(tree, None)
 
-	def test_nonexistence(self):
-		with self.assertRaises(FileNotFoundError):
-			tree = UPGMA_treeConstructor('tests/test_nonexistence.txt').create_tree()
-
 	def test_correct(self):
-		tree1 = UPGMA_treeConstructor('test.txt')
+		tree1 = UPGMA_treeConstructor('tests/test.txt')
 		tree2 = Phylo.TreeConstruction.DistanceTreeConstructor().upgma(tree1.distances)
 
 		self.assertTrue(nx.is_isomorphic(Phylo.to_networkx(tree1.create_tree()), 

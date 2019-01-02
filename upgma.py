@@ -1,5 +1,7 @@
 from Bio.Phylo import TreeConstruction
 import matplotlib.pyplot as plt
+from Bio.Phylo import BaseTree 
+from Bio.Phylo import draw as phylo_draw
 
 def _read_matrix(filename):
 	with open(filename) as f:
@@ -10,14 +12,11 @@ def _read_matrix(filename):
 	if len(buf) != len(header):
 		raise ValueError('Distance matrix must be square')
 	
-	#TODO prettify this block
 	for i, l in enumerate(buf):
 		if len(l) != len(header):
 			raise ValueError('Distance matrix must be square')
 
-		buf[i] =  l[i::]
-		buf[i] = buf[i][::-1]
-
+		buf[i] =  l[i::][::-1]
 
 	if not buf:
 		return None
@@ -64,14 +63,14 @@ class UPGMA_treeConstructor:
 			self.tree = None
 			return None
 
-		clades = [Phylo.BaseTree.Clade(None, n) for n in self.distances.names]
+		clades = [BaseTree.Clade(None, n) for n in self.distances.names]
 
 		find_clade = lambda name: [i for i, el in enumerate(clades) if el.name == name][0]
 
 		while len(self.distances.names) > 1: 
 			dist, i, j = _find_min(self.distances)
 			i_clade, j_clade = find_clade(i), find_clade(j)
-			new_clade = Phylo.BaseTree.Clade(None, str(i) + str(j))
+			new_clade = BaseTree.Clade(None, str(i) + str(j))
 
 			_calc_height(clades[i_clade], dist)
 			_calc_height(clades[j_clade], dist)
@@ -86,9 +85,12 @@ class UPGMA_treeConstructor:
 			clades.pop(j_clade)
 
 			clades.append(new_clade)
-			self.distances = _join_clades(i, j, len(new_clade.clades), len(new_clade.clades), self.distances)
+			self.distances = _join_clades(i, j, 
+				len(new_clade.clades), 
+				len(new_clade.clades), 
+				self.distances)
 
-		self.tree = Phylo.BaseTree.Tree(clades[0])
+		self.tree = BaseTree.Tree(clades[0])
 
 		return self.tree
 
@@ -99,7 +101,7 @@ class UPGMA_treeConstructor:
 			self.create_tree()
 
 		show = True if not filename else False
-		Phylo.draw(self.tree,
+		phylo_draw(self.tree,
 			do_show=show)
 
 		if filename:
