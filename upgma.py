@@ -28,7 +28,7 @@ def _read_matrix(filename):
 	
 	return res
 
-def _join_clades(x, y, sizex, sizey, dist):
+def _join_clades(x, y, dist):
 	for i in dist.names:
 		if i != x:
 			dist[x, i] = (dist[x, i] + dist[y, i]) / 2
@@ -109,10 +109,7 @@ class UPGMA_treeConstructor:
 			clades.pop(j_clade)
 
 			clades.append(new_clade)
-			self.distances = _join_clades(i, j, 
-				len(new_clade.clades), 
-				len(new_clade.clades), 
-				self.distances)
+			self.distances = _join_clades(i, j, self.distances)
 
 		self.tree = BaseTree.Tree(clades[0])
 
