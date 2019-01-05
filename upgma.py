@@ -2,6 +2,8 @@ from Bio.Phylo import TreeConstruction
 import matplotlib.pyplot as plt
 from Bio.Phylo import BaseTree 
 from Bio.Phylo import draw as phylo_draw
+import copy
+#from Bio.Phylo import Newick as BaseTree
 
 def _read_matrix(filename):
 	with open(filename) as f:
@@ -27,9 +29,9 @@ def _read_matrix(filename):
 	return res
 
 def _join_clades(x, y, sizex, sizey, dist):
-	
 	for i in dist.names:
-		dist[i, x] = (sizex * dist[i, x] + sizey * dist[i, y]) / (sizex + sizey)
+		if i != x:
+			dist[x, i] = (dist[x, i] + dist[y, i]) / 2
 		
 	dist.names[dist.names.index(x)] = x + y
 	del dist[y]
@@ -41,17 +43,23 @@ def _find_min(m):
 
 	for i in m.names:
 		for j in m.names:
-			if m[i, j] < min_val and m[i, j] > 0:
+			if m[i, j] <= min_val and m[i, j] > 0:
 				min_val, i_min, j_min = m[i, j], i, j
 
-	return min_val, i_min, j_min 
+	return min_val, i_min, j_min
+
+def _calc_height(clade, height):
+	if not clade.clades:
+		return height + clade.branch_length
+
+	return height + max([_calc_height(c, clade.branch_length) for c in clade.clades]) 
 
 
-def _calc_height(clade, dist):
-	if len(clade.clades) == 0:
+def _recalc_height(clade, dist):
+	if not clade.clades:
 		clade.branch_length = dist / 2
 	else:
-		clade.branch_length = dist / 2 - clade.clades[-1].branch_length
+		clade.branch_length = dist / 2 - _calc_height(clade, 0)
 
 
 class UPGMA_treeConstructor:
@@ -72,6 +80,9 @@ class UPGMA_treeConstructor:
 		based on the distance matrix
 		"""
 
+		if hasattr(self, 'tree'):
+			return self.tree
+
 		if not self.distances:
 			self.tree = None
 			return None
@@ -83,10 +94,10 @@ class UPGMA_treeConstructor:
 		while len(self.distances.names) > 1: 
 			dist, i, j = _find_min(self.distances)
 			i_clade, j_clade = find_clade(i), find_clade(j)
-			new_clade = BaseTree.Clade(None, str(i) + str(j))
+			new_clade = BaseTree.Clade(0, str(i) + str(j))
 
-			_calc_height(clades[i_clade], dist)
-			_calc_height(clades[j_clade], dist)
+			_recalc_height(clades[i_clade], dist)
+			_recalc_height(clades[j_clade], dist)
 
 			new_clade.clades.append(clades[i_clade])
 			new_clade.clades.append(clades[j_clade])
@@ -127,6 +138,3 @@ class UPGMA_treeConstructor:
 
 		if filename:
 			plt.savefig(filename)
-
-
-

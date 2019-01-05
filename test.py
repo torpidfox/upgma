@@ -24,11 +24,16 @@ class TestUPGMA_treeConstructor(unittest.TestCase):
 		self.assertEqual(tree, None)
 
 	def test_correct(self):
-		tree1 = UPGMA_treeConstructor('tests/test.txt')
-		tree2 = Phylo.TreeConstruction.DistanceTreeConstructor().upgma(tree1.distances)
+		matrix_path = 'tests/test{}.txt'
+		result_path = 'tests/rtest{}.txt'
+		converter = Phylo.NewickIO.Writer
 
-		self.assertTrue(nx.is_isomorphic(Phylo.to_networkx(tree1.create_tree()), 
-			Phylo.to_networkx(tree2)))
+		for i in range(1, 6):
+			tree1 = UPGMA_treeConstructor(matrix_path.format(i)).create_tree()
+			tree2 = Phylo.read(result_path.format(i), 'newick')
+
+			self.assertTrue(nx.is_isomorphic(Phylo.to_networkx(tree1).to_undirected(), 
+				Phylo.to_networkx(tree2).to_undirected()))
 
 
 if __name__ == '__main__':
