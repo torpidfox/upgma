@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from Bio.Phylo import BaseTree 
 from Bio.Phylo import draw as phylo_draw
 import copy
-#from Bio.Phylo import Newick as BaseTree
 
 def _read_matrix(filename):
 	with open(filename) as f:
@@ -14,17 +13,21 @@ def _read_matrix(filename):
 	if len(buf) != len(header):
 		raise ValueError('Distance matrix must be square')
 	
+	
+	buf = list(zip(*buf))
+
 	for i, l in enumerate(buf):
 		if len(l) != len(header):
 			raise ValueError('Distance matrix must be square')
 
-		buf[i] =  l[i::][::-1]
+		buf[i] =  list(l[:i + 1:])
+
 
 	if not buf:
 		return None
 
-	res = TreeConstruction.DistanceMatrix(names=header[::-1],
-			matrix=buf[::-1])
+	res = TreeConstruction.DistanceMatrix(names=header,
+			matrix=buf)
 	
 	return res
 
@@ -43,7 +46,7 @@ def _find_min(m):
 
 	for i in m.names:
 		for j in m.names:
-			if m[i, j] <= min_val and m[i, j] > 0:
+			if m[i, j] < min_val and m[i, j] > 0:
 				min_val, i_min, j_min = m[i, j], i, j
 
 	return min_val, i_min, j_min
@@ -109,7 +112,7 @@ class UPGMA_treeConstructor:
 			clades.pop(j_clade)
 
 			clades.append(new_clade)
-			self.distances = _join_clades(i, j, self.distances)
+			self.distances = _join_clades(i, j,  self.distances)
 
 		self.tree = BaseTree.Tree(clades[0])
 
